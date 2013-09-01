@@ -10,9 +10,8 @@ type Transaction struct {
   LenderId  int     `meddler:"lender_id"`
   DebtorId  int     `meddler:"debtor_id"`
   Amount    int     `meddler:"amount"`
-  LabelId   int     `meddler:"label_id"`
-  Comment   string  `meddler:"comment"`
   Date      string  `meddler:"date"`
+  ExpenseId int     `meddler:"expense_id"`
 }
 
 
@@ -25,13 +24,22 @@ func GetTransactionById(db meddler.DB, id int) (*Transaction, error) {
   return trans, nil
 }
 
-func GetTransactionsByLabel(db meddler.DB, label_id int) ([]*Transaction, error) {
-  var transactions []*Transaction
-  err := meddler.QueryAll(db, &transactions, "select * from transactions where label_id = ?", label_id)
+// Adds a transaction to the db, and updates the user's balances accordingly
+func addTransaction(db meddler.DB, lender *User, debtor *User, amount int, expense *Expense) (*Transaction, error) {
+  trans := new(Transaction)
+  trans.LenderId = lender.Id
+  trans.DebtorId = debtor.Id
+  trans.Amount = amount
+  trans.Date = expense.Date
+  trans.ExpenseId = expense.Id
+
+  err := meddler.Insert(db, "transactions", trans)
   if err != nil {
     return nil, err
   }
-  return transactions, nil
+
+  lender.UpdateBalance(amount)
+  debtor.UpdateBalance(-amount)
+
+  return trans
 }
-
-

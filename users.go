@@ -22,4 +22,13 @@ func GetUserByName(db meddler.DB, name string) (*User, error) {
   return user, nil
 }
 
+func (u *User) UpdateBalance(delta int) (error) {
+  u.balance += delta
+  err := meddler.Update(db, "users", u)
+  if err != nil {
+    return err
+  }
+  return nil
+}
+
 //func AddUser(db meddler.DB, )
