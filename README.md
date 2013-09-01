@@ -1,0 +1,4 @@
+banktorrent
+===========
+
+Distributed transaction tracker
