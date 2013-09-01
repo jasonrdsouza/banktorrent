@@ -22,3 +22,4 @@ func GetUserByName(db meddler.DB, name string) (*User, error) {
   return user, nil
 }
 
+//func AddUser(db meddler.DB, )

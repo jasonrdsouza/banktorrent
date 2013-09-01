@@ -1,16 +1,9 @@
 package banktorrent
 
 import (
-  "time"
   "github.com/russross/meddler"
 )
 
-
-
-type MoneyAmount struct {
-  Dollars int
-  Cents int
-}
 
 type Transaction struct {
   Id        int     `meddler:"id,pk"`

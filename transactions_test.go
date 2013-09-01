@@ -2,25 +2,41 @@ package banktorrent
 
 import (
   "testing"
+  "database/sql"
+  _ "github.com/mattn/go-sqlite3"
 )
 
 
-func TestCreateGroup(t *testing.T) {
-  t.Error("Implement test!")
+func TestGetTransactionById(t *testing.T) {
+  db, err := sql.Open("sqlite3", TEST_DB)
+  if err != nil {
+    t.Fatal(err)
+  }
+  defer db.Close()
+  
+  transaction, err := GetTransactionById(db, 21)
+  test_error_helper(t, err)
+  if transaction.Amount != 81920 {
+    t.Error("Fetched transaction has the wrong amount: ", transaction)
+  }
+  if transaction.Date != "2013-04-01" {
+    t.Error("Fetched transaction has wrong date: ", transaction)
+  }
 }
 
-func TestAddGroupMember(t *testing.T) {
-  t.Error("Implement test!")
-}
+func TestGetTransactionsByLabel(t *testing.T) {
+  db, err := sql.Open("sqlite3", TEST_DB)
+  if err != nil {
+    t.Fatal(err)
+  }
+  defer db.Close()
 
-func TestAddTransaction(t *testing.T) {
-  t.Error("Implement test!")
-}
-
-func TestDeleteTransaction(t *testing.T) {
-  t.Error("Implement test!")
-}
-
-func TestTransactionStore(t *testing.T) {
-  t.Error("Implement test!")
+  transactions, err := GetTransactionsByLabel(db, 1)
+  test_error_helper(t, err)
+  if len(transactions) < 19 {
+    t.Error("Didn't fetch all of the groceries transactions: ", transactions)
+  }
+  if len(transactions) > 0 && (transactions[0]).LabelId != 1 {
+    t.Error("Transactions from the wrong label were found: ", transactions)
+  }
 }

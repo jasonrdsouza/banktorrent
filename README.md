@@ -12,13 +12,13 @@ Todo
 ----
 
 - [ ] Read-only ability
-  - [X] User model, helpers, tests
-  - [ ] Transactions model, helpers, tests
-    - [ ] migrate schema over
-  - [ ] Labels model, helpers, tests
-    - [ ] migrate schema over
+  - [x] User model, helpers, tests
+  - [x] Transactions model, helpers, tests
+    - [x] migrate schema over
+  - [x] Labels model, helpers, tests
+    - [x] migrate schema over
 - [ ] Write ability
-  - [ ] transaction types
+  - [ ] expenses
     - [ ] split transaction
       - [ ] N person split
     - [ ] regular transaction
