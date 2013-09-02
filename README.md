@@ -13,9 +13,6 @@ Todo
 - Setup foreign key relationships
   - add to db/schemas file
 - Write ability
-  - expenses
-    - tests
-    - ability to delete expenses
   - ability to add labels
   - ability to add users
   - make writing transactional
