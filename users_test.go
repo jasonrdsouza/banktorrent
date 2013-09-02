@@ -43,6 +43,27 @@ func Test_GetUserByName(t *testing.T) {
   }
 }
 
+func Test_UserUpdateBalance(t *testing.T) {
+  db, err := sql.Open("sqlite3", TEST_DB)
+  if err != nil {
+    t.Fatal(err)
+  }
+  defer db.Close()
+
+  amount := 100 // $1
+  user, err := GetUserById(db, 1)
+  test_error_helper(t, err)
+  old_balance := user.Balance
+  test_error_helper(t, user.UpdateBalance(db, amount))
+  if user.Balance != (old_balance + amount) {
+    t.Error("User balance update failed. Expected: ", (old_balance + amount), ", but got: ", user.Balance)
+  }
+  test_error_helper(t, user.UpdateBalance(db, -amount))
+  if user.Balance != old_balance {
+    t.Error("User balance negative update failed. Expected: ", old_balance, ", but got: ", user.Balance)
+  }
+}
+
 func Test_Sample(t *testing.T) {
   t.Log("Hello")
   //t.Error("testing failures")

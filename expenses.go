@@ -71,10 +71,28 @@ func AddSplitExpense(db meddler.DB, lender *User, debtors []*User, expense *Expe
 
 func (e *Expense) Transactions(db meddler.DB) ([]*Transaction, error) {
   var transactions []*Transaction
-  err := meddler.QueryAll(db, transactions, "select * from transactions where expense_id = ?", e.Id)
+  err := meddler.QueryAll(db, &transactions, "select * from transactions where expense_id = ?", e.Id)
   return transactions, err
 }
 
+// Removes the expense by reversing all transactions associated with it,
+// and deleting the expense from the db
 func (e *Expense) Remove(db meddler.DB) (error) {
-  
+  transactions, err := e.Transactions(db)
+  if err != nil {
+    return err
+  }
+  for _, transaction := range(transactions) {
+    err := transaction.remove(db)
+    if err != nil {
+      return err
+    }
+  }
+  // remove the expense from the db
+  _, err = db.Exec("DELETE FROM expenses WHERE id = ?", e.Id)
+  if err != nil {
+    return err
+  }
+  e = nil
+  return nil
 }

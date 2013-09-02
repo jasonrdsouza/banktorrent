@@ -30,4 +30,8 @@ func (u *User) UpdateBalance(db meddler.DB, delta int) (error) {
   return meddler.Update(db, "users", u)
 }
 
+func (u *User) Reload(db meddler.DB) (error) {
+  return meddler.Load(db, "users", u, u.Id)
+}
+
 //func AddUser(db meddler.DB, )

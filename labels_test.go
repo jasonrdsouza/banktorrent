@@ -14,7 +14,7 @@ func Test_GetLabelById(t *testing.T) {
   }
   defer db.Close()
 
-  label, err := GetLabelById(1)
+  label, err := GetLabelById(db, 1)
   test_error_helper(t, err)
   if label.Name != "groceries" {
     t.Error("Fetched label has wrong name: ", label)

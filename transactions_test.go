@@ -30,22 +30,45 @@ func Test_GetTransactionById(t *testing.T) {
   } 
 }
 
-func Test_AddTransaction(t *testing.T) {
+func Test_AddRemoveTransaction(t *testing.T) {
   db, err := sql.Open("sqlite3", TEST_DB)
   if err != nil {
     t.Fatal(err)
   }
   defer db.Close()
 
-  t.Error("Unimplemented test")
-}
-
-func Test_RemoveTransaction(t *testing.T) {
-  db, err := sql.Open("sqlite3", TEST_DB)
-  if err != nil {
-    t.Fatal(err)
+  // Add and check transaction
+  amount := 200 // $2
+  lender, err := GetUserById(db, 1)
+  test_error_helper(t, err)
+  old_lender_balance := lender.Balance
+  debtor, err := GetUserById(db, 2)
+  test_error_helper(t, err)
+  old_debtor_balance := debtor.Balance
+  expense, err := GetExpenseById(db, 2)
+  test_error_helper(t, err)
+  transaction, err := addTransaction(db, lender, debtor, amount, expense)
+  test_error_helper(t, err)
+  t.Log("Created transaction with id: ", transaction.Id)
+  if lender.Balance != (old_lender_balance + amount) {
+    t.Error("Lender balance not updated correctly on transaction creation: ", lender)
   }
-  defer db.Close()
+  if debtor.Balance != (old_debtor_balance - amount) {
+    t.Error("Debtor balance not updated correctly on transaction creation: ", debtor)
+  }
 
-  t.Error("Unimplemented test")
+  // Remove transaction
+  err = transaction.remove(db)
+  test_error_helper(t, err)
+  err = lender.Reload(db)
+  test_error_helper(t, err)
+  err = debtor.Reload(db)
+  test_error_helper(t, err)
+
+  if lender.Balance != old_lender_balance {
+    t.Error("Lender balance not updated correctly on transaction removal: ", lender)
+  }
+  if debtor.Balance != old_debtor_balance {
+    t.Error("Debtor balance not updated correctly on transaction removal: ", debtor)
+  }
 }

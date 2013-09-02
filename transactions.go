@@ -42,26 +42,26 @@ func addTransaction(db meddler.DB, lender *User, debtor *User, amount int, expen
 }
 
 // Reverses a transaction, removes it from the DB, and frees the struct
-func removeTransaction(db meddler.DB, transaction *Transaction) error {
-  lender, err := GetUserById(transaction.LenderId)
+func (t *Transaction) remove(db meddler.DB) error {
+  lender, err := GetUserById(db, t.LenderId)
   if err != nil {
     return err
   }
-  debtor, err := GetUserById(transaction.DebtorId)
+  debtor, err := GetUserById(db, t.DebtorId)
   if err != nil {
     return err
   }
 
   // reverse the balance updates due to this transaction
-  lender.UpdateBalance(db, -transaction.Amount)
-  debtor.UpdateBalance(db, transaction.Amount)
+  lender.UpdateBalance(db, -(t.Amount))
+  debtor.UpdateBalance(db, t.Amount)
 
   // remove the transaction from the db
-  _, err := db.Exec("DELETE FROM transactions WHERE id = ?", transaction.Id)
+  _, err = db.Exec("DELETE FROM transactions WHERE id = ?", t.Id)
   if err != nil {
     return err
   }
-  transaction = nil
+  t = nil
 
   return nil
 }
