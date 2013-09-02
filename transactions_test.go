@@ -7,36 +7,45 @@ import (
 )
 
 
-func TestGetTransactionById(t *testing.T) {
+func Test_GetTransactionById(t *testing.T) {
   db, err := sql.Open("sqlite3", TEST_DB)
   if err != nil {
     t.Fatal(err)
   }
   defer db.Close()
   
-  transaction, err := GetTransactionById(db, 21)
+  transaction, err := GetTransactionById(db, 1)
   test_error_helper(t, err)
-  if transaction.Amount != 81920 {
+  if transaction.Amount != 1000 {
     t.Error("Fetched transaction has the wrong amount: ", transaction)
   }
-  if transaction.Date != "2013-04-01" {
+  if transaction.Date != "2013-07-01" {
     t.Error("Fetched transaction has wrong date: ", transaction)
   }
+  if transaction.LenderId != 1 || transaction.DebtorId != 2 {
+    t.Error("Fetched transaction has incorrect lender/ debtor: ", transaction)
+  }
+  if transaction.ExpenseId != 1 {
+    t.Error("Fetched transaction has incorrect expense association: ", transaction)
+  } 
 }
 
-func TestGetTransactionsByLabel(t *testing.T) {
+func Test_AddTransaction(t *testing.T) {
   db, err := sql.Open("sqlite3", TEST_DB)
   if err != nil {
     t.Fatal(err)
   }
   defer db.Close()
 
-  transactions, err := GetTransactionsByLabel(db, 1)
-  test_error_helper(t, err)
-  if len(transactions) < 19 {
-    t.Error("Didn't fetch all of the groceries transactions: ", transactions)
+  t.Error("Unimplemented test")
+}
+
+func Test_RemoveTransaction(t *testing.T) {
+  db, err := sql.Open("sqlite3", TEST_DB)
+  if err != nil {
+    t.Fatal(err)
   }
-  if len(transactions) > 0 && (transactions[0]).LabelId != 1 {
-    t.Error("Transactions from the wrong label were found: ", transactions)
-  }
+  defer db.Close()
+
+  t.Error("Unimplemented test")
 }

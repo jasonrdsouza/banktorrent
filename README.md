@@ -15,10 +15,14 @@ Todo
 - Write ability
   - expenses
     - tests
+    - ability to delete expenses
   - ability to add labels
   - ability to add users
   - make writing transactional
     - replace sql.Dx with sql.Tx
+- Tests
+  - make all tests pass
+  - test coverage of all methods/ functions
 - CLI 
   - ability to backup db
   - add transactions

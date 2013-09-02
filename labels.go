@@ -11,11 +11,14 @@ type Label struct {
 }
 
 
+func GetLabelById(db meddler.DB, id int) (*Label, error) {
+  label := new(Label)
+  err := meddler.Load(db, "labels", label, id)
+  return label, err
+}
+
 func GetLabelByName(db meddler.DB, name string) (*Label, error) {
   label := new(Label)
   err := meddler.QueryRow(db, label, "select * from labels where name = ?", name)
-  if err != nil {
-    return nil, err
-  }
-  return label, nil
+  return label, err
 }

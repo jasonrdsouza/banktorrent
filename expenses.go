@@ -12,22 +12,24 @@ type MoneyAmount struct {
 }
 
 type Expense struct {
-  Id      int
-  Amount  int
-  LabelId int
-  Comment string
-  Date    string
+  Id      int     `meddler:"id,pk"`
+  Amount  int     `meddler:"amount"`
+  LabelId int     `meddler:"label_id"`
+  Comment string  `meddler:"comment"`
+  Date    string  `meddler:"date"`
 }
 
 
+func GetExpenseById(db meddler.DB, id int) (*Expense, error) {
+  expense := new(Expense)
+  err := meddler.Load(db, "expenses", expense, id)
+  return expense, err
+}
 
 func GetExpensesByLabel(db meddler.DB, label *Label) ([]*Expense, error) {
   var expenses []*Expense
   err := meddler.QueryAll(db, &expenses, "select * from expenses where label_id = ?", label.Id)
-  if err != nil {
-    return nil, err
-  }
-  return expenses, nil
+  return expenses, err
 }
 
 // Creates the expense in the db and gives it an ID
@@ -39,10 +41,7 @@ func CreateExpense(db meddler.DB, amount int, label *Label, comment string, date
   expense.Date = date
   
   err := meddler.Insert(db, "expenses", expense)
-  if err != nil {
-    return nil, err
-  }
-  return expense, nil
+  return expense, err
 }
 
 // Adds a single transaction. The entire expense amount is credited to the lender and charged to the debtor
@@ -68,4 +67,14 @@ func AddSplitExpense(db meddler.DB, lender *User, debtors []*User, expense *Expe
     transactions[index] = transaction
   }
   return transactions, nil
+}
+
+func (e *Expense) Transactions(db meddler.DB) ([]*Transaction, error) {
+  var transactions []*Transaction
+  err := meddler.QueryAll(db, transactions, "select * from transactions where expense_id = ?", e.Id)
+  return transactions, err
+}
+
+func (e *Expense) Remove(db meddler.DB) (error) {
+  
 }

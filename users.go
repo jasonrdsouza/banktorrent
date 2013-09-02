@@ -13,22 +13,21 @@ type User struct {
 }
 
 
+func GetUserById(db meddler.DB, id int) (*User, error) {
+  user := new(User)
+  err := meddler.Load(db, "users", user, id)
+  return user, err
+}
+
 func GetUserByName(db meddler.DB, name string) (*User, error) {
   user := new(User)
   err := meddler.QueryRow(db, user, "select * from users where name = ?", name)
-  if err != nil {
-    return nil, err
-  }
-  return user, nil
+  return user, err
 }
 
-func (u *User) UpdateBalance(delta int) (error) {
-  u.balance += delta
-  err := meddler.Update(db, "users", u)
-  if err != nil {
-    return err
-  }
-  return nil
+func (u *User) UpdateBalance(db meddler.DB, delta int) (error) {
+  u.Balance += delta
+  return meddler.Update(db, "users", u)
 }
 
 //func AddUser(db meddler.DB, )

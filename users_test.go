@@ -7,26 +7,43 @@ import (
 )
 
 
-func TestGetUserByName(t *testing.T) {
+func Test_GetUserById(t *testing.T) {
+  db, err := sql.Open("sqlite3", TEST_DB)
+  if err != nil {
+    t.Fatal(err)
+  }
+  defer db.Close()
+
+  user, err := GetUserById(db, 1)
+  test_error_helper(t, err)
+  if user.Name != "User One" {
+    t.Error("Fetched user has wrong name: ", user)
+  }
+  if user.Email != "user-one@test.com" {
+    t.Error("Fetched user has wrong email address: ", user)
+  }
+}
+
+func Test_GetUserByName(t *testing.T) {
   db, err := sql.Open("sqlite3", TEST_DB)
   if err != nil {
     t.Fatal(err)
   }
   defer db.Close()
   
-  user_jason, err := GetUserByName(db, "Jason Dsouza")
+  user1, err := GetUserByName(db, "User One")
   test_error_helper(t, err)
-  if user_jason.Id != 1 {
-    t.Error("Fetched user has wrong ID", user_jason)
+  if user1.Id != 1 {
+    t.Error("Fetched user has wrong ID: ", user1)
   }
-  user_rachel, err := GetUserByName(db, "Rachel Repard")
+  user2, err := GetUserByName(db, "User Two")
   test_error_helper(t, err)
-  if user_rachel.Id != 2 {
-    t.Error("Fetched user has wrong ID: ", user_rachel)
+  if user2.Email != "user-two@test.com" {
+    t.Error("Fetched user has wrong email address: ", user2)
   }
 }
 
-func TestSample(t *testing.T) {
+func Test_Sample(t *testing.T) {
   t.Log("Hello")
   //t.Error("testing failures")
 }
