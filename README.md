@@ -10,6 +10,7 @@ Author: Jason D'Souza
 
 Todo
 ----
+- rename "test_error_helper"
 - Setup foreign key relationships
   - add to db/schemas file
 - Write ability

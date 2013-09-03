@@ -160,6 +160,45 @@ func Test_AddSplitExpense(t *testing.T) {
     t.Fatal(err)
   }
   defer db.Close()
+  
+  lender, err := GetUserById(db, 1)
+  test_error_helper(t, err)
+  lender_starting_balance := lender.Balance
+  debtor1, err := GetUserById(db, 2)
+  test_error_helper(t, err)
+  debtor1_starting_balance := debtor1.Balance
+  debtor2, err := GetUserById(db, 3)
+  test_error_helper(t, err)
+  debtor2_starting_balance := debtor2.Balance
+  expense, err := GetExpenseById(3)
+  test_error_helper(t, err)
+  expense_amount := expense.Amount
+
+  // Add expense
+  transactions, err := AddSplitExpense(db, lender, []*User{debtor1, debtor2}, expense)
+  test_error_helper(t, err)
+  if len(transactions) != 2 {
+    t.Error("Wrong number of transactions present. Expected: 2, but got: ", len(transactions))
+  }
+  if transactions[0].Amount != transactions[1].Amount {
+    t.Error("Transaction amounts not equal: ", transactions[0].Amount, " and ", transactions[1].Amount)
+  }
+  if (transactions[0].Amount + transactions[1].Amount) != expense.Amount {
+    t.Error("Transaction amounts do not add up to expense amount.")
+  }
+  if lender.Balance != (lender_starting_balance + (2.0/3) * expense_amount) {
+    // 2/3 of the expense amount is the amount owed to the lender since he is also paying for the expense
+    t.Error("Expense amount not split evenly between participants (lender)")
+  }
+  if debtor1.Balance != (debtor1_starting_balance + (1.0/3) * expense_amount) {
+    t.Error("Expense amount not split evenly between participants (debtor1)")
+  }
+  
+  // test user balances here
+
+  // Remove expense
+  // test user balances reverted
+
 
   t.Error("Unimplemented test")
 }
