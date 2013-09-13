@@ -20,15 +20,19 @@ CREATE TABLE "expenses" (
   "amount" INTEGER, 
   "label_id" INTEGER, 
   "date" VARCHAR(255), 
-  "comment" VARCHAR(255)
+  "comment" VARCHAR(255),
+  FOREIGN KEY(label_id) REFERENCES labels(id)
 );
 
 -- Transactions Table
 CREATE TABLE "transactions" (
   "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-  "amount" INTEGER, 
-  "lender_id" INTEGER, 
-  "debtor_id" INTEGER, 
+  "amount" INTEGER,
+  "lender_id" INTEGER,
+  "debtor_id" INTEGER,
   "date" VARCHAR(255), 
-  "expense_id" INTEGER
+  "expense_id" INTEGER,
+  FOREIGN KEY(lender_id) REFERENCES users(id),
+  FOREIGN KEY(debtor_id) REFERENCES users(id),
+  FOREIGN KEY(expense_id) REFERENCES expenses(id)
 );

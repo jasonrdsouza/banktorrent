@@ -3,21 +3,19 @@ BankTorrent
 
 BankTorrent is a distributed debt and payment tracking system. It allows
 groups of people to keep track of shared expenses and how much they owe
-eachother. 
+eachother.
 
 Author: Jason D'Souza
 
 
 Todo
 ----
-- Setup foreign key relationships
-  - add to db/schemas file
 - Write ability
   - ability to add labels
   - ability to add users
   - make writing transactional
     - replace sql.Dx with sql.Tx
-- CLI 
+- CLI
   - ability to backup db
   - add transactions
   - add labels
