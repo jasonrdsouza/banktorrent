@@ -10,7 +10,6 @@ Author: Jason D'Souza
 
 Todo
 ----
-- rename "test_error_helper"
 - Setup foreign key relationships
   - add to db/schemas file
 - Write ability
@@ -18,9 +17,6 @@ Todo
   - ability to add users
   - make writing transactional
     - replace sql.Dx with sql.Tx
-- Tests
-  - make all tests pass
-  - test coverage of all methods/ functions
 - CLI 
   - ability to backup db
   - add transactions
@@ -34,6 +30,8 @@ Todo
   - graphs
     - visualization of transaction history
     - breakdown by label
+- Tests
+  - test coverage of all methods/ functions
 
 
 Workflow

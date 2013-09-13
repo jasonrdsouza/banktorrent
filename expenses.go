@@ -57,7 +57,7 @@ func AddSplitExpense(db meddler.DB, lender *User, debtors []*User, expense *Expe
   if len(debtors) < 1 {
     return nil, errors.New("Debtors list must have at least 1 element")
   }
-  split_amount := expense.Amount / (len(debtors) + 1) //# of debtors + 1 lender
+  split_amount := int(float32(expense.Amount) / float32(len(debtors) + 1)) //# of debtors + 1 lender
   transactions := make([]*Transaction, len(debtors))
   for index, debtor := range(debtors) {
     transaction, err := addTransaction(db, lender, debtor, split_amount, expense)

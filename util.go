@@ -11,7 +11,7 @@ const (
 )
 
 
-func test_error_helper(t *testing.T, err error) {
+func handle_error(t *testing.T, err error) {
   if err != nil {
     t.Error(err)
   }

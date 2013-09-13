@@ -15,8 +15,8 @@ func Test_GetExpenseById(t *testing.T) {
   defer db.Close()
   
   expense, err := GetExpenseById(db, 1)
-  test_error_helper(t, err)
-  if expense.Amount != 2000 {
+  handle_error(t, err)
+  if expense.Amount != 2500 {
     t.Error("Fetched expense has the wrong amount: ", expense)
   }
   if expense.Date != "2013-07-01" {
@@ -38,13 +38,13 @@ func Test_GetExpensesByLabel(t *testing.T) {
   defer db.Close()
   
   label, err := GetLabelByName(db, "groceries")
-  test_error_helper(t, err)
+  handle_error(t, err)
   expenses, err := GetExpensesByLabel(db, label)
-  test_error_helper(t, err)
+  handle_error(t, err)
   if len(expenses) != 1 {
     t.Error("Expected 1 expense, but found ", len(expenses), " for the label: ", label.Name)
   }
-  if expenses[0].Amount != 2000 {
+  if expenses[0].Amount != 2500 {
     t.Error("Expense amount incorrect: ", expenses[0])
   } 
   if expenses[0].Id != 1 {
@@ -66,16 +66,16 @@ func Test_ExpenseTransactions(t *testing.T) {
   defer db.Close()
 
   expense, err := GetExpenseById(db, 1)
-  test_error_helper(t, err)
+  handle_error(t, err)
   transactions, err := expense.Transactions(db)
-  test_error_helper(t, err)
+  handle_error(t, err)
   if len(transactions) != 1 {
     t.Error("Expected 1 expense transaction, but got ", len(transactions))
   }
   if transactions[0].Id != 1 {
     t.Error("Expense transaction has wrong id: ", transactions[0])
   }
-  if transactions[0].Amount != 1000 {
+  if transactions[0].Amount != 2500 {
     t.Error("Expense transaction has wrong amount: ", transactions[0])
   }
 }
@@ -88,12 +88,12 @@ func Test_CreateDeleteExpense(t *testing.T) {
   defer db.Close()
 
   label, err := GetLabelByName(db, "groceries")
-  test_error_helper(t, err)
+  handle_error(t, err)
   expense, err := CreateExpense(db, 100, label, "test dollar expense", "2013-08-04")
-  test_error_helper(t, err)
+  handle_error(t, err)
   t.Log("Created expense with id: ", expense.Id)
   err = expense.Remove(db)
-  test_error_helper(t, err)
+  handle_error(t, err)
 }
 
 func Test_AddSimpleExpense(t *testing.T) {
@@ -105,11 +105,11 @@ func Test_AddSimpleExpense(t *testing.T) {
 
   expense_amount := 100
   user1, err := GetUserByName(db, "User One")
-  test_error_helper(t, err)
+  handle_error(t, err)
   user2, err := GetUserByName(db, "User Two")
-  test_error_helper(t, err)
+  handle_error(t, err)
   label, err := GetLabelByName(db, "miscellaneous")
-  test_error_helper(t, err)
+  handle_error(t, err)
   expense, err := CreateExpense(db, expense_amount, label, "test miscellaneous simple expense", "2013-08-01")
   t.Log("Created expense with id: ", expense.Id)
 
@@ -118,7 +118,7 @@ func Test_AddSimpleExpense(t *testing.T) {
 
   // Add expense
   transaction, err := AddSimpleExpense(db, user1, user2, expense)
-  test_error_helper(t, err)
+  handle_error(t, err)
   if transaction.LenderId != user1.Id {
     t.Error("Transaction has the incorrect lender. Should be: ", user1.Id, ", but got: ", transaction.LenderId)
   }
@@ -143,9 +143,9 @@ func Test_AddSimpleExpense(t *testing.T) {
   }
 
   // Remove expense
-  test_error_helper(t, expense.Remove(db))
-  test_error_helper(t, user1.Reload(db))
-  test_error_helper(t, user2.Reload(db))
+  handle_error(t, expense.Remove(db))
+  handle_error(t, user1.Reload(db))
+  handle_error(t, user2.Reload(db))
   if user1.Balance != user1_old_balance {
     t.Error("Lender balance incorrect after simple expense removal. Expected: ", user1_old_balance, ", but got: ", user1.Balance)
   }
@@ -162,46 +162,55 @@ func Test_AddSplitExpense(t *testing.T) {
   defer db.Close()
   
   lender, err := GetUserById(db, 1)
-  test_error_helper(t, err)
+  handle_error(t, err)
   lender_starting_balance := lender.Balance
   debtor1, err := GetUserById(db, 2)
-  test_error_helper(t, err)
+  handle_error(t, err)
   debtor1_starting_balance := debtor1.Balance
   debtor2, err := GetUserById(db, 3)
-  test_error_helper(t, err)
+  handle_error(t, err)
   debtor2_starting_balance := debtor2.Balance
-  expense, err := GetExpenseById(3)
-  test_error_helper(t, err)
+  expense, err := GetExpenseById(db, 3)
+  handle_error(t, err)
   expense_amount := expense.Amount
 
   // Add expense
   transactions, err := AddSplitExpense(db, lender, []*User{debtor1, debtor2}, expense)
-  test_error_helper(t, err)
+  handle_error(t, err)
+
   if len(transactions) != 2 {
     t.Error("Wrong number of transactions present. Expected: 2, but got: ", len(transactions))
   }
   if transactions[0].Amount != transactions[1].Amount {
     t.Error("Transaction amounts not equal: ", transactions[0].Amount, " and ", transactions[1].Amount)
   }
-  if (transactions[0].Amount + transactions[1].Amount) != expense.Amount {
+  if int(float32(transactions[0].Amount + transactions[1].Amount) * (3.0/2)) != expense.Amount {
     t.Error("Transaction amounts do not add up to expense amount.")
   }
-  if lender.Balance != (lender_starting_balance + (2.0/3) * expense_amount) {
+  if lender.Balance != (lender_starting_balance + int((2.0/3) * float32(expense_amount))) {
     // 2/3 of the expense amount is the amount owed to the lender since he is also paying for the expense
     t.Error("Expense amount not split evenly between participants (lender)")
   }
-  if debtor1.Balance != (debtor1_starting_balance + (1.0/3) * expense_amount) {
+  if debtor1.Balance != (debtor1_starting_balance - int((1.0/3) * float32(expense_amount))) {
     t.Error("Expense amount not split evenly between participants (debtor1)")
   }
+  if debtor2.Balance != (debtor2_starting_balance - int((1.0/3) * float32(expense_amount))) {
+    t.Error("Expense amount not split evenly between participants (debtor2)")
+  }
   
-  // test user balances here
-
   // Remove expense
-  // test user balances reverted
+  handle_error(t, expense.Remove(db))
+  handle_error(t, lender.Reload(db))
+  handle_error(t, debtor1.Reload(db))
+  handle_error(t, debtor2.Reload(db))
 
-
-  t.Error("Unimplemented test")
+  if lender.Balance != lender_starting_balance {
+    t.Error("Lender balance incorrect after split expense removal. Expected: ", lender_starting_balance, ", but got: ", lender.Balance)
+  }
+  if debtor1.Balance != debtor1_starting_balance {
+    t.Error("Debtor1 balance incorrect after split expense removal. Expected: ", debtor1_starting_balance, ", but got: ", debtor1.Balance)
+  }
+  if debtor2.Balance != debtor2_starting_balance {
+    t.Error("Debtor2 balance incorrect after split expense removal. Expected: ", debtor2_starting_balance, ", but got: ", debtor2.Balance)
+  }
 }
-
-
-
