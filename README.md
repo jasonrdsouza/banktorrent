@@ -11,6 +11,9 @@ Author: Jason D'Souza
 Todo
 ----
 - Write ability
+  - remove users/ labels
+    - only if there are no expenses/ transactions/ associated with them
+    - cant remove if it would leave db in inconsistent state
   - make writing transactional
     - replace sql.Dx with sql.Tx
 - CLI
@@ -22,12 +25,13 @@ Todo
     - upcoming bills
     - potentially missing transactions
 - web frontend
-  - build off of the cli
   - graphs
     - visualization of transaction history
     - breakdown by label
 - Tests
   - test coverage of all methods/ functions
+- Integrate terminal prettying
+  - https://github.com/wsxiaoys/terminal
 
 
 Workflow
