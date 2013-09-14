@@ -34,4 +34,12 @@ func (u *User) Reload(db meddler.DB) (error) {
   return meddler.Load(db, "users", u, u.Id)
 }
 
-//func AddUser(db meddler.DB, )
+func CreateUser(db meddler.DB, name string, email string, balance int) (*User, error) {
+  user := new(User)
+  user.Name = name
+  user.Email = email
+  user.Balance = balance
+
+  err := meddler.Insert(db, "users", user)
+  return user, err
+}

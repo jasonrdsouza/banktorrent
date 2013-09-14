@@ -11,8 +11,6 @@ Author: Jason D'Souza
 Todo
 ----
 - Write ability
-  - ability to add labels
-  - ability to add users
   - make writing transactional
     - replace sql.Dx with sql.Tx
 - CLI

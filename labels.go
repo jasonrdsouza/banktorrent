@@ -22,3 +22,11 @@ func GetLabelByName(db meddler.DB, name string) (*Label, error) {
   err := meddler.QueryRow(db, label, "select * from labels where name = ?", name)
   return label, err
 }
+
+func CreateLabel(db meddler.DB, name string) (*Label, error) {
+  label := new(Label)
+  label.Name = name
+
+  err := meddler.Insert(db, "labels", label)
+  return label, err
+}

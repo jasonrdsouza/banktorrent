@@ -39,28 +39,28 @@ func CreateExpense(db meddler.DB, amount int, label *Label, comment string, date
   expense.LabelId = label.Id
   expense.Comment = comment
   expense.Date = date
-  
+
   err := meddler.Insert(db, "expenses", expense)
   return expense, err
 }
 
 // Adds a single transaction. The entire expense amount is credited to the lender and charged to the debtor
-func AddSimpleExpense(db meddler.DB, lender *User, debtor *User, expense *Expense) (*Transaction, error) {
-  return addTransaction(db, lender, debtor, expense.Amount, expense)
+func (e *Expense) AddSimple(db meddler.DB, lender *User, debtor *User) (*Transaction, error) {
+  return addTransaction(db, lender, debtor, e.Amount, e)
 }
 
 // Adds 1 transaction per debtor. The amount is split evenly between everyone (penny errors can occur).
-// This type of transaction is useful even with just 2 people (a debtor and a lender) because it behaves 
-// differently than a SimpleExpense. Namely, it splits the expense.Amount evenly between everyone, including 
+// This type of transaction is useful even with just 2 people (a debtor and a lender) because it behaves
+// differently than a SimpleExpense. Namely, it splits the expense.Amount evenly between everyone, including
 // the lender, allowing for "shared expenses" to be added easily
-func AddSplitExpense(db meddler.DB, lender *User, debtors []*User, expense *Expense) ([]*Transaction, error) {
+func (e *Expense) AddSplit(db meddler.DB, lender *User, debtors []*User) ([]*Transaction, error) {
   if len(debtors) < 1 {
     return nil, errors.New("Debtors list must have at least 1 element")
   }
-  split_amount := int(float32(expense.Amount) / float32(len(debtors) + 1)) //# of debtors + 1 lender
+  split_amount := int(float32(e.Amount) / float32(len(debtors) + 1)) //# of debtors + 1 lender
   transactions := make([]*Transaction, len(debtors))
   for index, debtor := range(debtors) {
-    transaction, err := addTransaction(db, lender, debtor, split_amount, expense)
+    transaction, err := addTransaction(db, lender, debtor, split_amount, e)
     if err != nil {
       return transactions, err
     }
