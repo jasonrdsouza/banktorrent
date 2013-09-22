@@ -1,6 +1,7 @@
 package banktorrent
 
 import (
+  "fmt"
   "github.com/russross/meddler"
 )
 
@@ -32,6 +33,10 @@ func (u *User) UpdateBalance(db meddler.DB, delta int) (error) {
 
 func (u *User) Reload(db meddler.DB) (error) {
   return meddler.Load(db, "users", u, u.Id)
+}
+
+func (u *User) String() (string) {
+  return fmt.Sprintf("User #%v [Name: %v, Email: %v, Balance: %v]", u.Id, u.Name, u.Email, u.Balance)
 }
 
 func CreateUser(db meddler.DB, name string, email string, balance int) (*User, error) {

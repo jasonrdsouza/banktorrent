@@ -3,8 +3,16 @@ package banktorrent
 import (
   "github.com/russross/meddler"
   "errors"
+  "fmt"
 )
 
+
+type ExpenseType int
+// Currently supported expense types
+const (
+  SIMPLE_EXPENSE ExpenseType = iota
+  SPLIT_EXPENSE
+)
 
 type MoneyAmount struct {
   Dollars int
@@ -67,6 +75,10 @@ func (e *Expense) AddSplit(db meddler.DB, lender *User, debtors []*User) ([]*Tra
     transactions[index] = transaction
   }
   return transactions, nil
+}
+
+func (e *Expense) String() (string) {
+  return fmt.Sprintf("Expense #%v [Amount: %v, LabelID: %v, Date: %v, Comment: %v]", e.Id, e.Amount, e.LabelId, e.Date, e.Comment)
 }
 
 func (e *Expense) Transactions(db meddler.DB) ([]*Transaction, error) {

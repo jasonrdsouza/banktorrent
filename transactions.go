@@ -2,6 +2,7 @@ package banktorrent
 
 import (
   "github.com/russross/meddler"
+  "fmt"
 )
 
 
@@ -17,7 +18,7 @@ type Transaction struct {
 
 func GetTransactionById(db meddler.DB, id int) (*Transaction, error) {
   trans := new(Transaction)
-  err := meddler.Load(db, "transactions", trans, id) 
+  err := meddler.Load(db, "transactions", trans, id)
   return trans, err
 }
 
@@ -39,6 +40,10 @@ func addTransaction(db meddler.DB, lender *User, debtor *User, amount int, expen
   debtor.UpdateBalance(db, -amount)
 
   return trans, nil
+}
+
+func (t *Transaction) String() (string) {
+  return fmt.Sprintf("Transaction #%v [LenderID: %v, DebtorID: %v, Amount: %v, Date: %v, ExpenseID: %v]", t.Id, t.LenderId, t.DebtorId, t.Amount, t.Date, t.ExpenseId)
 }
 
 // Reverses a transaction, removes it from the DB, and frees the struct

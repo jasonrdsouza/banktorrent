@@ -21,9 +21,12 @@ Todo
   - add transactions
   - add labels
   - add users
+  - start using banktorrent.MoneyAmount type
+    - use meddler for db part?
   - get statistics
     - upcoming bills
     - potentially missing transactions
+  - tests
 - web frontend
   - graphs
     - visualization of transaction history

@@ -1,6 +1,7 @@
 package banktorrent
 
 import (
+  "fmt"
   "github.com/russross/meddler"
 )
 
@@ -29,4 +30,8 @@ func CreateLabel(db meddler.DB, name string) (*Label, error) {
 
   err := meddler.Insert(db, "labels", label)
   return label, err
+}
+
+func (l *Label) String() (string) {
+  return fmt.Sprintf("Label #%v [%v]", l.Id, l.Name)
 }
