@@ -3,25 +3,26 @@ package main
 import (
   "flag"
   "fmt"
-  "log"
+  //"log"
   "time"
   "bytes"
+  "text/template"
   "github.com/jasonrdsouza/banktorrent"
 )
 
 
 const (
   DATE_FMT = "2006-01-02"
-  const tmpl = `
+  tmpl = `
   Parameters
   ----------
-  - Date:\t{{.Date}}
-  - Label:\t{{.Label}}
-  - Lender:\t{{.Lender}}
-  - Debtor:\t{{.Debtor}}
-  - Amount:\t{{.Amount}}
-  - Kind:\t{{.Kind}}
-  - Comment:\t{{.Comment}}
+  - Date: {{.Date}}
+  - Label:  {{.Label}}
+  - Lender: {{.Lender}}
+  - Debtor: {{.Debtor}}
+  - Amount: {{.Amount}}
+  - Kind: {{.Kind}}
+  - Comment:  {{.Comment}}
   `
 )
 
@@ -45,31 +46,31 @@ type ValidParams struct {
   Kind banktorrent.ExpenseType
 }
 
-raw = new(RawParams)
+var raw = new(RawParams)
 func init() {
-  flag.StringVar(&raw.Label, "Label", "miscellaneous", "The label for this expense")
-  flag.StringVar(&raw.Lender, "Lender", "", "The lender for this expense")
-  flag.StringVar(&raw.Debtor, "Debtor", "", "The debtor for this expense")
-  flag.StringVar(&raw.Date, "Date", "", "The date that the expense took place")
-  flag.IntVar(&raw.Amount, "Amount", 0, "The amount of this expense")
-  flag.StringVar(&raw.Comment, "Comment", "", "Comments associated with this expense")
-  flag.StringVar(&raw.Kind, "Expense Kind", "", "What kind of expense this is")
+  flag.StringVar(&raw.Label, "label", "misc", "The label for this expense")
+  flag.StringVar(&raw.Lender, "lender", "bob", "The lender for this expense")
+  flag.StringVar(&raw.Debtor, "debtor", "alice", "The debtor for this expense")
+  flag.StringVar(&raw.Date, "date", "2013-09-31", "The date that the expense took place")
+  flag.IntVar(&raw.Amount, "amount", 0, "The amount of this expense")
+  flag.StringVar(&raw.Comment, "comment", "sample cli expense", "Comments associated with this expense")
+  flag.StringVar(&raw.Kind, "kind", "simple", "What kind of expense this is")
 }
 
 func main() {
   flag.Parse()
   fmt.Println("Input params: ", raw)
-  valid, err := validateParams(raw)
-  if err != nil {
-    log.Fatalln("Failed to validate params: ", err)
-  }
-  fmt.Println("Validated params: ", valid)
+  // valid, err := validateParams(raw)
+  // if err != nil {
+  //   log.Fatalln("Failed to validate params: ", err)
+  // }
+  // fmt.Println("Validated params: ", valid)
   fmt.Println("Adding Expense")
 }
 
 func (r *RawParams) String() (string) {
   t := template.Must(template.New("raw_tmpl").Parse(tmpl))
-  var buf = bytes.Buffer
+  var buf = new(bytes.Buffer)
   err := t.Execute(buf, r)
   if err != nil {
     return ""
@@ -79,7 +80,7 @@ func (r *RawParams) String() (string) {
 
 func (v *ValidParams) String() (string) {
   t := template.Must(template.New("valid_tmpl").Parse(tmpl))
-  var buf = bytes.Buffer
+  var buf = new(bytes.Buffer)
   err := t.Execute(buf, v)
   if err != nil {
     return ""
@@ -87,6 +88,6 @@ func (v *ValidParams) String() (string) {
   return buf.String()
 }
 
-func validateParams(raw RawParams) (ValidParams, error) {
-
+func validateParams(raw RawParams) (*ValidParams, error) {
+  return nil, nil
 }
