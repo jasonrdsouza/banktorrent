@@ -2,18 +2,17 @@ package banktorrent
 
 import (
   "testing"
-  "database/sql"
   _ "github.com/mattn/go-sqlite3"
 )
 
 
 func Test_GetTransactionById(t *testing.T) {
-  db, err := sql.Open("sqlite3", TEST_DB)
+  db, err := Connect(TEST_DB)
   if err != nil {
     t.Fatal(err)
   }
   defer db.Close()
-  
+
   transaction, err := GetTransactionById(db, 1)
   handle_error(t, err)
   if transaction.Amount != 2500 {
@@ -27,11 +26,11 @@ func Test_GetTransactionById(t *testing.T) {
   }
   if transaction.ExpenseId != 1 {
     t.Error("Fetched transaction has incorrect expense association: ", transaction)
-  } 
+  }
 }
 
 func Test_AddRemoveTransaction(t *testing.T) {
-  db, err := sql.Open("sqlite3", TEST_DB)
+  db, err := Connect(TEST_DB)
   if err != nil {
     t.Fatal(err)
   }

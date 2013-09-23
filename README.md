@@ -19,6 +19,9 @@ Todo
 - CLI
   - ability to backup db
   - add transactions
+    - make the user input more forgiving?
+      - case insensitive
+      - just the first name?
   - add labels
   - add users
   - start using banktorrent.MoneyAmount type

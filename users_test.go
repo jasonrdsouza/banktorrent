@@ -2,13 +2,12 @@ package banktorrent
 
 import (
   "testing"
-  "database/sql"
   _ "github.com/mattn/go-sqlite3"
 )
 
 
 func Test_GetUserById(t *testing.T) {
-  db, err := sql.Open("sqlite3", TEST_DB)
+  db, err := Connect(TEST_DB)
   if err != nil {
     t.Fatal(err)
   }
@@ -25,12 +24,12 @@ func Test_GetUserById(t *testing.T) {
 }
 
 func Test_GetUserByName(t *testing.T) {
-  db, err := sql.Open("sqlite3", TEST_DB)
+  db, err := Connect(TEST_DB)
   if err != nil {
     t.Fatal(err)
   }
   defer db.Close()
-  
+
   user1, err := GetUserByName(db, "User One")
   handle_error(t, err)
   if user1.Id != 1 {
@@ -44,7 +43,7 @@ func Test_GetUserByName(t *testing.T) {
 }
 
 func Test_UserUpdateBalance(t *testing.T) {
-  db, err := sql.Open("sqlite3", TEST_DB)
+  db, err := Connect(TEST_DB)
   if err != nil {
     t.Fatal(err)
   }

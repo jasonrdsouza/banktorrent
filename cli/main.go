@@ -8,6 +8,7 @@ import (
   "bytes"
   "text/template"
   "github.com/jasonrdsouza/banktorrent"
+  "database/sql"
 )
 
 
@@ -37,9 +38,9 @@ type RawParams struct {
 }
 
 type ValidParams struct {
-  Label banktorrent.Label
-  Lender banktorrent.User
-  Debtor banktorrent.User
+  Label *banktorrent.Label
+  Lender *banktorrent.User
+  Debtor *banktorrent.User
   Date time.Time
   Amount banktorrent.MoneyAmount
   Comment string
@@ -60,11 +61,18 @@ func init() {
 func main() {
   flag.Parse()
   fmt.Println("Input params: ", raw)
-  // valid, err := validateParams(raw)
-  // if err != nil {
-  //   log.Fatalln("Failed to validate params: ", err)
-  // }
-  // fmt.Println("Validated params: ", valid)
+
+  db, err := banktorrent.Connect(banktorrent.TEST_DB)
+  if err != nil {
+    log.Fatalln(err)
+  }
+  defer db.Close()
+
+  valid, err := validateParams(db, raw)
+  if err != nil {
+    log.Fatalln("Failed to validate params: ", err)
+  }
+  fmt.Println("Validated params: ", valid)
   fmt.Println("Adding Expense")
 }
 
@@ -88,6 +96,20 @@ func (v *ValidParams) String() (string) {
   return buf.String()
 }
 
-func validateParams(raw RawParams) (*ValidParams, error) {
-  return nil, nil
+func validateParams(db sql.DB, raw RawParams) (*ValidParams, error) {
+  valid := new(ValidParams)
+  valid.Label, err := banktorrent.GetLabelByName(db, raw.Label)
+  if err != nil {
+    return nil, err
+  }
+  valid.Lender, err := banktorrent.GetUserByName(db, raw.Lender)
+  if err != nil {
+    return nil, err
+  }
+  valid.Debtor, err := banktorrent.GetUserByName(db, raw.Debtor)
+  if err != nil {
+    return nil, err
+  }
+
+  return valid, nil
 }

@@ -2,6 +2,7 @@ package banktorrent
 
 import (
   "testing"
+  "database/sql"
 )
 
 
@@ -17,3 +18,6 @@ func handle_error(t *testing.T, err error) {
   }
 }
 
+func Connect(database string) (*sql.DB, error) {
+  return sql.Open("sqlite3", database)
+}

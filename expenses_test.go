@@ -2,13 +2,12 @@ package banktorrent
 
 import (
   "testing"
-  "database/sql"
   _ "github.com/mattn/go-sqlite3"
 )
 
 
 func Test_GetExpenseById(t *testing.T) {
-  db, err := sql.Open("sqlite3", TEST_DB)
+  db, err := Connect(TEST_DB)
   if err != nil {
     t.Fatal(err)
   }
@@ -31,7 +30,7 @@ func Test_GetExpenseById(t *testing.T) {
 }
 
 func Test_GetExpensesByLabel(t *testing.T) {
-  db, err := sql.Open("sqlite3", TEST_DB)
+  db, err := Connect(TEST_DB)
   if err != nil {
     t.Fatal(err)
   }
@@ -59,7 +58,7 @@ func Test_GetExpensesByLabel(t *testing.T) {
 }
 
 func Test_ExpenseTransactions(t *testing.T) {
-  db, err := sql.Open("sqlite3", TEST_DB)
+  db, err := Connect(TEST_DB)
   if err != nil {
     t.Fatal(err)
   }
@@ -81,7 +80,7 @@ func Test_ExpenseTransactions(t *testing.T) {
 }
 
 func Test_CreateDeleteExpense(t *testing.T) {
-  db, err := sql.Open("sqlite3", TEST_DB)
+  db, err := Connect(TEST_DB)
   if err != nil {
     t.Fatal(err)
   }
@@ -97,7 +96,7 @@ func Test_CreateDeleteExpense(t *testing.T) {
 }
 
 func Test_AddSimpleExpense(t *testing.T) {
-  db, err := sql.Open("sqlite3", TEST_DB)
+  db, err := Connect(TEST_DB)
   if err != nil {
     t.Fatal(err)
   }
@@ -155,7 +154,7 @@ func Test_AddSimpleExpense(t *testing.T) {
 }
 
 func Test_AddSplitExpense(t *testing.T) {
-  db, err := sql.Open("sqlite3", TEST_DB)
+  db, err := Connect(TEST_DB)
   if err != nil {
     t.Fatal(err)
   }
