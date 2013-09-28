@@ -2,7 +2,6 @@ package banktorrent
 
 import (
   "testing"
-  _ "github.com/mattn/go-sqlite3"
 )
 
 

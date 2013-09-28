@@ -4,6 +4,8 @@ import (
   "github.com/russross/meddler"
   "errors"
   "fmt"
+  "strings"
+  "strconv"
 )
 
 
@@ -17,6 +19,32 @@ const (
 type MoneyAmount struct {
   Dollars int
   Cents int
+}
+
+func StringToMoney(amount string) (*MoneyAmount, error) {
+  raw_amount := strings.Split(strings.TrimLeft(strings.TrimSpace(amount), "$"), ".")
+  ma := new(MoneyAmount)
+  dollars, err := strconv.Atoi(raw_amount[0])
+  if err != nil {
+    return nil, err
+  }
+  if len(raw_amount) < 2 { // no cents given
+    raw_amount = append(raw_amount, "00")
+  }
+  cents, err := strconv.Atoi(raw_amount[1])
+  if err != nil {
+    return nil, err
+  }
+  if cents > 99 {
+    return nil, errors.New("Invalid cents amount... cannot be greater than 99")
+  }
+  ma.Dollars = dollars
+  ma.Cents = cents
+  return ma, nil
+}
+
+func (m *MoneyAmount) String() (string) {
+  return fmt.Sprintf("$%d.%d", m.Dollars, m.Cents)
 }
 
 type Expense struct {

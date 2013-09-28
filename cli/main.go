@@ -3,9 +3,10 @@ package main
 import (
   "flag"
   "fmt"
-  //"log"
+  "log"
   "time"
   "bytes"
+  "strings"
   "text/template"
   "github.com/jasonrdsouza/banktorrent"
   "database/sql"
@@ -32,7 +33,7 @@ type RawParams struct {
   Lender string
   Debtor string
   Date string
-  Amount int
+  Amount string
   Comment string
   Kind string
 }
@@ -42,7 +43,7 @@ type ValidParams struct {
   Lender *banktorrent.User
   Debtor *banktorrent.User
   Date time.Time
-  Amount banktorrent.MoneyAmount
+  Amount *banktorrent.MoneyAmount
   Comment string
   Kind banktorrent.ExpenseType
 }
@@ -53,7 +54,7 @@ func init() {
   flag.StringVar(&raw.Lender, "lender", "bob", "The lender for this expense")
   flag.StringVar(&raw.Debtor, "debtor", "alice", "The debtor for this expense")
   flag.StringVar(&raw.Date, "date", "2013-09-31", "The date that the expense took place")
-  flag.IntVar(&raw.Amount, "amount", 0, "The amount of this expense")
+  flag.StringVar(&raw.Amount, "amount", "25.00", "The amount of this expense")
   flag.StringVar(&raw.Comment, "comment", "sample cli expense", "Comments associated with this expense")
   flag.StringVar(&raw.Kind, "kind", "simple", "What kind of expense this is")
 }
@@ -96,20 +97,35 @@ func (v *ValidParams) String() (string) {
   return buf.String()
 }
 
-func validateParams(db sql.DB, raw RawParams) (*ValidParams, error) {
-  valid := new(ValidParams)
-  valid.Label, err := banktorrent.GetLabelByName(db, raw.Label)
+func validateParams(db *sql.DB, raw *RawParams) (*ValidParams, error) {
+  label, err := banktorrent.GetLabelByName(db, strings.TrimSpace(raw.Label))
   if err != nil {
+    log.Println("Error validating label", raw.Label)
     return nil, err
   }
-  valid.Lender, err := banktorrent.GetUserByName(db, raw.Lender)
+  lender, err := banktorrent.GetUserByName(db, strings.TrimSpace(raw.Lender))
   if err != nil {
+    log.Println("Error validating lender ", raw.Lender)
     return nil, err
   }
-  valid.Debtor, err := banktorrent.GetUserByName(db, raw.Debtor)
+  debtor, err := banktorrent.GetUserByName(db, strings.TrimSpace(raw.Debtor))
   if err != nil {
+    log.Println("Error validating debtor ", raw.Debtor)
     return nil, err
   }
+  date, err := time.Parse(DATE_FMT, strings.TrimSpace(raw.Date))
+  if err != nil {
+    log.Println("Error validating date ", raw.Date)
+    return nil, err
+  }
+  amount, err := banktorrent.StringToMoney(raw.Amount)
+  if err != nil {
+    log.Println("Error validating amount ", raw.Amount)
+    return nil, err
+  }
+  comment := strings.TrimSpace(raw.Comment)
+  // fix the kind
+  kind := banktorrent.SIMPLE_EXPENSE
 
-  return valid, nil
+  return &ValidParams{Label: label, Lender: lender, Debtor: debtor, Date: date, Amount: amount, Comment: comment, Kind: kind}, nil
 }
