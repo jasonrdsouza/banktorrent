@@ -16,15 +16,16 @@ Todo
     - cant remove if it would leave db in inconsistent state
   - make writing transactional
     - replace sql.Dx with sql.Tx
+- Meddler
+  - use the MoneyAmount type instead of ints
+  - change expense and transaction structs to use MoneyAmount
+  - make a meddler that converts from the int to MoneyAmount
 - CLI
   - ability to backup db
-  - add expenses
   - remove expenses
   - get list of expenses
   - add labels
   - add users
-  - start using banktorrent.MoneyAmount type
-    - use meddler for db part?
   - get statistics
     - upcoming bills
     - potentially missing transactions
