@@ -8,6 +8,7 @@ import (
 
 
 const (
+  DATE_FMT = "2006-01-02"
   TEST_DB = "/tmp/banktorrent.test.db"
   PROD_DB = ""
 )

@@ -5,46 +5,36 @@ import (
   "errors"
   "fmt"
   "strings"
-  "strconv"
+  "time"
 )
 
 
 type ExpenseType int
 // Currently supported expense types
 const (
-  SIMPLE_EXPENSE ExpenseType = iota
+  UNKNOWN_EXPENSE ExpenseType = iota
+  SIMPLE_EXPENSE
   SPLIT_EXPENSE
 )
 
-type MoneyAmount struct {
-  Dollars int
-  Cents int
+func StringToExpenseType(etype string) (ExpenseType, error) {
+  switch strings.TrimSpace(etype) {
+  case "simple":
+    return SIMPLE_EXPENSE, nil
+  case "split":
+    return SPLIT_EXPENSE, nil
+  }
+  return UNKNOWN_EXPENSE, errors.New("Could not parse expense type")
 }
 
-func StringToMoney(amount string) (*MoneyAmount, error) {
-  raw_amount := strings.Split(strings.TrimLeft(strings.TrimSpace(amount), "$"), ".")
-  ma := new(MoneyAmount)
-  dollars, err := strconv.Atoi(raw_amount[0])
-  if err != nil {
-    return nil, err
+func (e ExpenseType) String() (string) {
+  switch e {
+  case SIMPLE_EXPENSE:
+    return "simple"
+  case SPLIT_EXPENSE:
+    return "split"
   }
-  if len(raw_amount) < 2 { // no cents given
-    raw_amount = append(raw_amount, "00")
-  }
-  cents, err := strconv.Atoi(raw_amount[1])
-  if err != nil {
-    return nil, err
-  }
-  if cents > 99 {
-    return nil, errors.New("Invalid cents amount... cannot be greater than 99")
-  }
-  ma.Dollars = dollars
-  ma.Cents = cents
-  return ma, nil
-}
-
-func (m *MoneyAmount) String() (string) {
-  return fmt.Sprintf("$%d.%d", m.Dollars, m.Cents)
+  return "unknown"
 }
 
 type Expense struct {
@@ -69,12 +59,12 @@ func GetExpensesByLabel(db meddler.DB, label *Label) ([]*Expense, error) {
 }
 
 // Creates the expense in the db and gives it an ID
-func CreateExpense(db meddler.DB, amount int, label *Label, comment string, date string) (*Expense, error) {
+func CreateExpense(db meddler.DB, amount *MoneyAmount, label *Label, comment string, date time.Time) (*Expense, error) {
   expense := new(Expense)
-  expense.Amount = amount
+  expense.Amount = amount.Int()
   expense.LabelId = label.Id
   expense.Comment = comment
-  expense.Date = date
+  expense.Date = date.Format(DATE_FMT)
 
   err := meddler.Insert(db, "expenses", expense)
   return expense, err

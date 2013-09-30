@@ -18,10 +18,9 @@ Todo
     - replace sql.Dx with sql.Tx
 - CLI
   - ability to backup db
-  - add transactions
-    - make the user input more forgiving?
-      - case insensitive
-      - just the first name?
+  - add expenses
+  - remove expenses
+  - get list of expenses
   - add labels
   - add users
   - start using banktorrent.MoneyAmount type
@@ -29,6 +28,8 @@ Todo
   - get statistics
     - upcoming bills
     - potentially missing transactions
+  - predictive user input
+    - best guess based on input?
   - tests
 - web frontend
   - graphs

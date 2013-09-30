@@ -14,8 +14,7 @@ import (
 
 
 const (
-  DATE_FMT = "2006-01-02"
-  tmpl = `
+  param_tmpl = `
   Parameters
   ----------
   - Date: {{.Date}}
@@ -23,7 +22,7 @@ const (
   - Lender: {{.Lender}}
   - Debtor: {{.Debtor}}
   - Amount: {{.Amount}}
-  - Kind: {{.Kind}}
+  - Type: {{.Etype}}
   - Comment:  {{.Comment}}
   `
 )
@@ -35,7 +34,7 @@ type RawParams struct {
   Date string
   Amount string
   Comment string
-  Kind string
+  Etype string
 }
 
 type ValidParams struct {
@@ -45,7 +44,7 @@ type ValidParams struct {
   Date time.Time
   Amount *banktorrent.MoneyAmount
   Comment string
-  Kind banktorrent.ExpenseType
+  Etype banktorrent.ExpenseType
 }
 
 var raw = new(RawParams)
@@ -56,9 +55,12 @@ func init() {
   flag.StringVar(&raw.Date, "date", "2013-09-31", "The date that the expense took place")
   flag.StringVar(&raw.Amount, "amount", "25.00", "The amount of this expense")
   flag.StringVar(&raw.Comment, "comment", "sample cli expense", "Comments associated with this expense")
-  flag.StringVar(&raw.Kind, "kind", "simple", "What kind of expense this is")
+  flag.StringVar(&raw.Etype, "type", "simple", "What type of expense this is")
 }
 
+// Currently, this only works with 2 users... need to add the ability
+// to add split expenses with multiple users, meaning taking a list of
+// users with the lender flag.
 func main() {
   flag.Parse()
   fmt.Println("Input params: ", raw)
@@ -71,14 +73,46 @@ func main() {
 
   valid, err := validateParams(db, raw)
   if err != nil {
+    fmt.Println("Could not add expense due to malformed paramaters :(")
     log.Fatalln("Failed to validate params: ", err)
   }
   fmt.Println("Validated params: ", valid)
-  fmt.Println("Adding Expense")
+
+  expense, err := banktorrent.CreateExpense(db, valid.Amount, valid.Label, valid.Comment, valid.Date)
+  fmt.Printf("Adding %v as a %v expense\n", expense, valid.Etype)
+  switch valid.Etype {
+  case banktorrent.SIMPLE_EXPENSE:
+    transaction, err := expense.AddSimple(db, valid.Lender, valid.Debtor)
+    if err != nil {
+      fmt.Println("Error adding simple expense")
+      log.Fatalln(err)
+    }
+    fmt.Println("Expense transaction:\n", transaction)
+  case banktorrent.SPLIT_EXPENSE:
+    transactions, err := expense.AddSplit(db, valid.Lender, []*banktorrent.User{valid.Debtor})
+    if err != nil {
+      fmt.Println("Error adding split expense")
+      log.Fatalln(err)
+    }
+    fmt.Println("Expense transactions:\n", transactions)
+  }
+
+  // reload the users to see their new balances
+  err = valid.Lender.Reload(db)
+  if err != nil {
+    fmt.Println("Error reloading lender from DB")
+    log.Fatalln(err)
+  }
+  err = valid.Debtor.Reload(db)
+  if err != nil {
+    fmt.Println("Error reloading debtor from DB")
+    log.Fatalln(err)
+  }
+  fmt.Printf("New user balances:\n- Lender => %v\n- Debtor => %v\n", valid.Lender, valid.Debtor)
 }
 
 func (r *RawParams) String() (string) {
-  t := template.Must(template.New("raw_tmpl").Parse(tmpl))
+  t := template.Must(template.New("raw_tmpl").Parse(param_tmpl))
   var buf = new(bytes.Buffer)
   err := t.Execute(buf, r)
   if err != nil {
@@ -88,7 +122,7 @@ func (r *RawParams) String() (string) {
 }
 
 func (v *ValidParams) String() (string) {
-  t := template.Must(template.New("valid_tmpl").Parse(tmpl))
+  t := template.Must(template.New("valid_tmpl").Parse(param_tmpl))
   var buf = new(bytes.Buffer)
   err := t.Execute(buf, v)
   if err != nil {
@@ -113,7 +147,7 @@ func validateParams(db *sql.DB, raw *RawParams) (*ValidParams, error) {
     log.Println("Error validating debtor ", raw.Debtor)
     return nil, err
   }
-  date, err := time.Parse(DATE_FMT, strings.TrimSpace(raw.Date))
+  date, err := time.Parse(banktorrent.DATE_FMT, strings.TrimSpace(raw.Date))
   if err != nil {
     log.Println("Error validating date ", raw.Date)
     return nil, err
@@ -124,8 +158,11 @@ func validateParams(db *sql.DB, raw *RawParams) (*ValidParams, error) {
     return nil, err
   }
   comment := strings.TrimSpace(raw.Comment)
-  // fix the kind
-  kind := banktorrent.SIMPLE_EXPENSE
+  etype, err := banktorrent.StringToExpenseType(raw.Etype)
+  if err != nil {
+    log.Println("Error validating expense type ", raw.Etype)
+    return nil, err
+  }
 
-  return &ValidParams{Label: label, Lender: lender, Debtor: debtor, Date: date, Amount: amount, Comment: comment, Kind: kind}, nil
+  return &ValidParams{Label: label, Lender: lender, Debtor: debtor, Date: date, Amount: amount, Comment: comment, Etype: etype}, nil
 }
