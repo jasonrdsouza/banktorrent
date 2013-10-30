@@ -38,15 +38,15 @@ func (e ExpenseType) String() (string) {
 }
 
 type Expense struct {
-  Id      int     `meddler:"id,pk"`
+  Id      int64   `meddler:"id,pk"`
   Amount  int     `meddler:"amount"`
-  LabelId int     `meddler:"label_id"`
+  LabelId int64   `meddler:"label_id"`
   Comment string  `meddler:"comment"`
   Date    string  `meddler:"date"`
 }
 
 
-func GetExpenseById(db meddler.DB, id int) (*Expense, error) {
+func GetExpenseById(db meddler.DB, id int64) (*Expense, error) {
   expense := new(Expense)
   err := meddler.Load(db, "expenses", expense, id)
   return expense, err

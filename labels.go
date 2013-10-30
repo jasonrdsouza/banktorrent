@@ -7,12 +7,12 @@ import (
 
 
 type Label struct {
-  Id    int     `meddler:"id,pk"`
+  Id    int64   `meddler:"id,pk"`
   Name  string  `meddler:"name"`
 }
 
 
-func GetLabelById(db meddler.DB, id int) (*Label, error) {
+func GetLabelById(db meddler.DB, id int64) (*Label, error) {
   label := new(Label)
   err := meddler.Load(db, "labels", label, id)
   return label, err

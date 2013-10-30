@@ -1,8 +1,8 @@
 #!/bin/bash
 
 TEST_DB="/tmp/banktorrent.test.db"
-SCHEMAS="/home/jason/gocode/src/github.com/jasonrdsouza/banktorrent/db/schemas.sql"
-DATA="/home/jason/gocode/src/github.com/jasonrdsouza/banktorrent/db/test-data.sql"
+SCHEMAS="schemas.sql"
+DATA="test-data.sql"
 
 echo "Removing the old test db"
 rm $TEST_DB

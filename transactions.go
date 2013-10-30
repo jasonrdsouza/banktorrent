@@ -7,16 +7,16 @@ import (
 
 
 type Transaction struct {
-  Id        int     `meddler:"id,pk"`
-  LenderId  int     `meddler:"lender_id"`
-  DebtorId  int     `meddler:"debtor_id"`
-  Amount    int     `meddler:"amount"`
-  Date      string  `meddler:"date"`
-  ExpenseId int     `meddler:"expense_id"`
+  Id        int64     `meddler:"id,pk"`
+  LenderId  int64     `meddler:"lender_id"`
+  DebtorId  int64     `meddler:"debtor_id"`
+  Amount    int       `meddler:"amount"`
+  Date      string    `meddler:"date"`
+  ExpenseId int64     `meddler:"expense_id"`
 }
 
 
-func GetTransactionById(db meddler.DB, id int) (*Transaction, error) {
+func GetTransactionById(db meddler.DB, id int64) (*Transaction, error) {
   trans := new(Transaction)
   err := meddler.Load(db, "transactions", trans, id)
   return trans, err

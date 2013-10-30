@@ -7,14 +7,14 @@ import (
 
 
 type User struct {
-  Id      int       `meddler:"id,pk"`
+  Id      int64     `meddler:"id,pk"`
   Name    string    `meddler:"name"`
   Email   string    `meddler:"email"`
   Balance int       `meddler:"balance"`
 }
 
 
-func GetUserById(db meddler.DB, id int) (*User, error) {
+func GetUserById(db meddler.DB, id int64) (*User, error) {
   user := new(User)
   err := meddler.Load(db, "users", user, id)
   return user, err
