@@ -53,8 +53,8 @@ func init() {
   flag.StringVar(&raw.Lender, "lender", "bob", "The lender for this expense")
   flag.StringVar(&raw.Debtor, "debtor", "alice", "The debtor for this expense")
   flag.StringVar(&raw.Date, "date", "2013-09-31", "The date that the expense took place")
-  flag.StringVar(&raw.Amount, "amount", "25.00", "The amount of this expense")
-  flag.StringVar(&raw.Comment, "comment", "sample cli expense", "Comments associated with this expense")
+  flag.StringVar(&raw.Amount, "amount", "0.00", "The amount of this expense")
+  flag.StringVar(&raw.Comment, "comment", "", "Comments associated with this expense")
   flag.StringVar(&raw.Etype, "type", "simple", "What type of expense this is")
 }
 
@@ -65,7 +65,7 @@ func main() {
   flag.Parse()
   fmt.Println("Input params: ", raw)
 
-  db, err := banktorrent.Connect(banktorrent.TEST_DB)
+  db, err := banktorrent.Connect(banktorrent.PROD_DB)
   if err != nil {
     log.Fatalln(err)
   }
@@ -134,33 +134,33 @@ func (v *ValidParams) String() (string) {
 func validateParams(db *sql.DB, raw *RawParams) (*ValidParams, error) {
   label, err := banktorrent.GetLabelByName(db, strings.TrimSpace(raw.Label))
   if err != nil {
-    log.Println("Error validating label", raw.Label)
+    log.Println("Error validating label: ", raw.Label)
     return nil, err
   }
   lender, err := banktorrent.GetUserByName(db, strings.TrimSpace(raw.Lender))
   if err != nil {
-    log.Println("Error validating lender ", raw.Lender)
+    log.Println("Error validating lender: ", raw.Lender)
     return nil, err
   }
   debtor, err := banktorrent.GetUserByName(db, strings.TrimSpace(raw.Debtor))
   if err != nil {
-    log.Println("Error validating debtor ", raw.Debtor)
+    log.Println("Error validating debtor: ", raw.Debtor)
     return nil, err
   }
   date, err := time.Parse(banktorrent.DATE_FMT, strings.TrimSpace(raw.Date))
   if err != nil {
-    log.Println("Error validating date ", raw.Date)
+    log.Println("Error validating date: ", raw.Date)
     return nil, err
   }
   amount, err := banktorrent.StringToMoney(raw.Amount)
   if err != nil {
-    log.Println("Error validating amount ", raw.Amount)
+    log.Println("Error validating amount: ", raw.Amount)
     return nil, err
   }
   comment := strings.TrimSpace(raw.Comment)
   etype, err := banktorrent.StringToExpenseType(raw.Etype)
   if err != nil {
-    log.Println("Error validating expense type ", raw.Etype)
+    log.Println("Error validating expense type: ", raw.Etype)
     return nil, err
   }
 
