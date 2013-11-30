@@ -63,49 +63,59 @@ func main() {
   app.Name = "BankTorrent"
   app.Usage = "Easy, distributed debt and payment tracking system"
 
-  app.Flags = []cli.Flag {
-    cli.StringFlag{"label", "misc", "The label for the expense(s)"},
-    cli.StringFlag{"lender, l", "bob", "The lender for the expense"},
-    cli.StringFlag{"debtor, d", "alice", "The debtor for the expense"},
-    cli.StringFlag{"date", "2013-09-31", "The date the expense took place"},
-    cli.StringFlag{"amount, a", "0.00", "The amount of the expense"},
-    cli.StringFlag{"comment, c", "", "Comments associated with the expense"},
-    cli.StringFlag{"type, t", "simple", "The type of expense this is"},
+  command_add := cli.Command{
+      Name:       "add",
+      Usage:      "add an expense",
+      Flags:      []cli.Flag {
+                    cli.StringFlag{"label", "misc", "The label for the expense(s)"},
+                    cli.StringFlag{"lender, l", "bob", "The lender for the expense"},
+                    cli.StringFlag{"debtor, d", "alice", "The debtor for the expense"},
+                    cli.StringFlag{"date", "2013-09-31", "The date the expense took place"},
+                    cli.StringFlag{"amount, a", "0.00", "The amount of the expense"},
+                    cli.StringFlag{"comment, c", "", "Comments associated with the expense"},
+                    cli.StringFlag{"type, t", "simple", "The type of expense this is"},
+                  },
+      Action:     func(c *cli.Context) {
+                    valid, err := contextToValidParams(c, db)
+                    if err != nil {
+                      log.Fatalln("Could not add expense due to malformed paramaters. Error: ", err)
+                    }
+                    fmt.Println("Validated params: ", valid)
+                    addExpense(db, valid)
+                  },
   }
-  app.Action = func(c *cli.Context) {
-    valid, err := contextToValidParams(c, db)
-    if err != nil {
-      fmt.Println("Could not validate params. Error: ", err)
-    } else {
-      fmt.Println("Validated params: ", valid)
-    }
+  command_dry_run := cli.Command{
+      Name:       "dry-run",
+      Usage:      "dry run of adding an expense",
+      Flags:      []cli.Flag {
+                    cli.StringFlag{"label", "misc", "The label for the expense(s)"},
+                    cli.StringFlag{"lender, l", "bob", "The lender for the expense"},
+                    cli.StringFlag{"debtor, d", "alice", "The debtor for the expense"},
+                    cli.StringFlag{"date", "2013-09-31", "The date the expense took place"},
+                    cli.StringFlag{"amount, a", "0.00", "The amount of the expense"},
+                    cli.StringFlag{"comment, c", "", "Comments associated with the expense"},
+                    cli.StringFlag{"type, t", "simple", "The type of expense this is"},
+                  },
+      Action:     func(c *cli.Context) {
+                    valid, err := contextToValidParams(c, db)
+                    if err != nil {
+                      log.Fatalln("Could not add expense due to malformed paramaters. Error: ", err)
+                    }
+                    fmt.Println("Validated params: ", valid)
+                    //fake_add_expense
+                  },
   }
 
   app.Commands = []cli.Command{
-    {
-      Name:      "add",
-      Usage:     "add an expense",
-      Action:    func(c *cli.Context) {
-        valid, err := contextToValidParams(c, db)
-        if err != nil {
-          log.Fatalln("Could not add expense due to malformed paramaters. Error: ", err)
-        }
-        fmt.Println("Validated params: ", valid)
-        addExpense(db, valid)
-      },
-    },
-    {
-      Name:      "get",
-      Usage:     "Get an expense",
-      Action: func(c *cli.Context) {
-        println("got expense: ", c.Args().First())
-      },
-    },
+    command_add,
+    command_dry_run,
+    //backup
+    //edit
+    //rm
+    //show
   }
 
-
   app.Run(os.Args)
-
 }
 
 func contextToValidParams(c *cli.Context, db *sql.DB) (*ValidParams, error) {
