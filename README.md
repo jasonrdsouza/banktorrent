@@ -3,7 +3,7 @@ BankTorrent
 
 BankTorrent is a distributed debt and payment tracking system. It allows
 groups of people to keep track of shared expenses and how much they owe
-eachother.
+each other.
 
 Author: Jason D'Souza
 

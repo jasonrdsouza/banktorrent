@@ -1,8 +1,8 @@
 package main
 
 import (
-  "flag"
   "fmt"
+  "os"
   "log"
   "time"
   "bytes"
@@ -10,6 +10,7 @@ import (
   "text/template"
   "github.com/jasonrdsouza/banktorrent"
   "database/sql"
+  "github.com/codegangsta/cli"
 )
 
 
@@ -47,37 +48,83 @@ type ValidParams struct {
   Etype banktorrent.ExpenseType
 }
 
-var raw = new(RawParams)
-func init() {
-  flag.StringVar(&raw.Label, "label", "misc", "The label for this expense")
-  flag.StringVar(&raw.Lender, "lender", "bob", "The lender for this expense")
-  flag.StringVar(&raw.Debtor, "debtor", "alice", "The debtor for this expense")
-  flag.StringVar(&raw.Date, "date", "2013-09-31", "The date that the expense took place")
-  flag.StringVar(&raw.Amount, "amount", "0.00", "The amount of this expense")
-  flag.StringVar(&raw.Comment, "comment", "", "Comments associated with this expense")
-  flag.StringVar(&raw.Etype, "type", "simple", "What type of expense this is")
-}
 
 // Currently, this only works with 2 users... need to add the ability
 // to add split expenses with multiple users, meaning taking a list of
 // users with the lender flag.
 func main() {
-  flag.Parse()
-  fmt.Println("Input params: ", raw)
-
   db, err := banktorrent.Connect(banktorrent.PROD_DB)
   if err != nil {
     log.Fatalln(err)
   }
   defer db.Close()
 
+  app := cli.NewApp()
+  app.Name = "BankTorrent"
+  app.Usage = "Easy, distributed debt and payment tracking system"
+
+  app.Flags = []cli.Flag {
+    cli.StringFlag{"label", "misc", "The label for the expense(s)"},
+    cli.StringFlag{"lender, l", "bob", "The lender for the expense"},
+    cli.StringFlag{"debtor, d", "alice", "The debtor for the expense"},
+    cli.StringFlag{"date", "2013-09-31", "The date the expense took place"},
+    cli.StringFlag{"amount, a", "0.00", "The amount of the expense"},
+    cli.StringFlag{"comment, c", "", "Comments associated with the expense"},
+    cli.StringFlag{"type, t", "simple", "The type of expense this is"},
+  }
+  app.Action = func(c *cli.Context) {
+    valid, err := contextToValidParams(c, db)
+    if err != nil {
+      fmt.Println("Could not validate params. Error: ", err)
+    } else {
+      fmt.Println("Validated params: ", valid)
+    }
+  }
+
+  app.Commands = []cli.Command{
+    {
+      Name:      "add",
+      Usage:     "add an expense",
+      Action:    func(c *cli.Context) {
+        valid, err := contextToValidParams(c, db)
+        if err != nil {
+          log.Fatalln("Could not add expense due to malformed paramaters. Error: ", err)
+        }
+        fmt.Println("Validated params: ", valid)
+        addExpense(db, valid)
+      },
+    },
+    {
+      Name:      "get",
+      Usage:     "Get an expense",
+      Action: func(c *cli.Context) {
+        println("got expense: ", c.Args().First())
+      },
+    },
+  }
+
+
+  app.Run(os.Args)
+
+}
+
+func contextToValidParams(c *cli.Context, db *sql.DB) (*ValidParams, error) {
+  raw := &RawParams{Label: c.String("label"),
+                    Lender: c.String("lender"),
+                    Debtor: c.String("debtor"),
+                    Date: c.String("date"),
+                    Amount: c.String("amount"),
+                    Comment: c.String("comment"),
+                    Etype: c.String("type")}
+  fmt.Println("Input params: ", raw)
   valid, err := validateParams(db, raw)
   if err != nil {
-    fmt.Println("Could not add expense due to malformed paramaters :(")
-    log.Fatalln("Failed to validate params: ", err)
+    return nil, err
   }
-  fmt.Println("Validated params: ", valid)
+  return valid, nil
+}
 
+func addExpense(db *sql.DB, valid *ValidParams) {
   expense, err := banktorrent.CreateExpense(db, valid.Amount, valid.Label, valid.Comment, valid.Date)
   fmt.Printf("Adding %v as a %v expense\n", expense, valid.Etype)
   switch valid.Etype {
